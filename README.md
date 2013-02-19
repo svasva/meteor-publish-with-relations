@@ -5,7 +5,7 @@ to provide a convenient way to publish associated records.
 
 ## Installation
 
-Publish with relationscan be installed with [Meteorite](https://github.com/oortcloud/meteorite/).
+Publish with relation scan be installed with [Meteorite](https://github.com/oortcloud/meteorite/).
 From inside a Meteorite-managed app:
 
 ``` sh
