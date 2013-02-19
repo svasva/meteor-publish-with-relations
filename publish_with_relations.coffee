@@ -3,23 +3,20 @@ Meteor.publishWithRelations = (params) ->
   collection = params.collection
   associations = {}
   publishAssoc = (collection, filter, options) ->
-    collection.find(filter, options).observe
-      added: (obj) =>
-        pub.set(collection._name, obj._id, obj)
-        pub.flush()
-      changed: (obj) =>
-        pub.set(collection._name, obj._id, obj)
-        pub.flush()
-      removed: (obj) =>
-        pub.unset(collection._name, obj._id, _.keys(obj))
-        pub.flush()
-  doMapping = (obj, mappings) ->
-    for mapping in params.mappings
+    collection.find(filter, options).observeChanges
+      added: (id, fields) =>
+        pub.added(collection._name, id, fields)
+      changed: (id, fields) =>
+        pub.changed(collection._name, id, fields)
+      removed: (id) =>
+        pub.removed(collection._name, id)
+  doMapping = (id, obj, mappings) ->
+    for mapping in mappings
       mapFilter = {}
       mapOptions = {}
       if mapping.reverse
         objKey = mapping.collection._name
-        mapFilter[mapping.key] = obj._id
+        mapFilter[mapping.key] = id
       else
         objKey = mapping.key
         mapFilter._id = obj[mapping.key]
@@ -33,31 +30,26 @@ Meteor.publishWithRelations = (params) ->
           options: mapOptions
           mappings: mapping.mappings
       else
-        associations[obj._id][objKey]?.stop()
-        associations[obj._id][objKey] =
+        associations[id][objKey]?.stop()
+        associations[id][objKey] =
           publishAssoc(mapping.collection, mapFilter, mapOptions)
 
-  collectionHandle = collection.find(params.filter, params.options).observe
-    added: (obj) ->
-      pub.set(collection._name, obj._id, obj)
-      pub.flush()
-      associations[obj._id] ?= {}
-      doMapping(obj, params.mappings)
-    changed: (obj, idx, oldObj) ->
-      changedKeys = {}
-      _.each obj, (value, key) ->
-        unless oldObj[key] is value
-          changedKeys[key] = value
-          changedMappings = _.where(params.mappings, {key: key, reverse: false})
-          doMapping(obj, changedMappings)
-      pub.set(collection._name, obj._id, changedKeys)
-      pub.flush()
-    removed: (obj) ->
-      handle.stop() for handle in associations[obj._id]
-      pub.unset(collection._name, obj._id, _.keys(obj))
-      pub.flush()
-  pub.complete()
-  pub.flush()
+  filter = params.filter
+  options = params.options
+  collectionHandle = collection.find(filter, options).observeChanges
+    added: (id, fields) ->
+      pub.added(collection._name, id, fields)
+      associations[id] ?= {}
+      doMapping(id, fields, params.mappings)
+    changed: (id, fields) ->
+      _.each fields, (value, key) ->
+        changedMappings = _.where(params.mappings, {key: key, reverse: false})
+        doMapping(id, fields, changedMappings)
+      pub.changed(collection._name, id, fields)
+    removed: (id) ->
+      handle.stop() for handle in associations[id]
+      pub.removed(collection._name, id)
+  pub.ready()
 
   pub.onStop ->
     for association in associations
