@@ -2,7 +2,7 @@ Meteor.publishWithRelations = (params) ->
   pub = params.handle
   collection = params.collection
   associations = {}
-  publishAssoc = (pub, collection, filter, options) ->
+  publishAssoc = (collection, filter, options) ->
     collection.find(filter, options).observe
       added: (obj) =>
         pub.set(collection._name, obj._id, obj)
@@ -13,7 +13,7 @@ Meteor.publishWithRelations = (params) ->
       removed: (obj) =>
         pub.unset(collection._name, obj._id, _.keys(obj))
         pub.flush()
-  doMapping = (pub, obj, mappings) =>
+  doMapping = (obj, mappings) ->
     for mapping in params.mappings
       mapFilter = {}
       mapOptions = {}
@@ -35,31 +35,31 @@ Meteor.publishWithRelations = (params) ->
       else
         associations[obj._id][objKey]?.stop()
         associations[obj._id][objKey] =
-          publishAssoc(pub, mapping.collection, mapFilter, mapOptions)
+          publishAssoc(mapping.collection, mapFilter, mapOptions)
 
   collectionHandle = collection.find(params.filter, params.options).observe
-    added: (obj) =>
+    added: (obj) ->
       pub.set(collection._name, obj._id, obj)
       pub.flush()
       associations[obj._id] ?= {}
-      doMapping(pub, obj, params.mappings)
-    changed: (obj, idx, oldObj) =>
+      doMapping(obj, params.mappings)
+    changed: (obj, idx, oldObj) ->
       changedKeys = {}
       _.each obj, (value, key) ->
         unless oldObj[key] is value
           changedKeys[key] = value
           changedMappings = _.where(params.mappings, {key: key, reverse: false})
-          doMapping(pub, obj, changedMappings)
+          doMapping(obj, changedMappings)
       pub.set(collection._name, obj._id, changedKeys)
       pub.flush()
-    removed: (obj) =>
+    removed: (obj) ->
       handle.stop() for handle in associations[obj._id]
       pub.unset(collection._name, obj._id, _.keys(obj))
       pub.flush()
   pub.complete()
   pub.flush()
 
-  pub.onStop =>
+  pub.onStop ->
     for association in associations
       handle.stop() for handle in association
     collectionHandle.stop()
