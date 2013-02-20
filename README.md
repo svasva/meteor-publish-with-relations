@@ -16,29 +16,31 @@ $ mrt add publish-with-relations
 
 ### Basics
 
-```coffeescript
-Meteor.startup ->
-  Meteor.publish 'post', (id) ->
-    Meteor.publishWithRelations
-      handle: @
-      collection: Posts
-      filter: id
-      mappings: [
-        key: 'authorId'
+```javascript
+  Meteor.publish('post', function(id) {
+    Meteor.publishWithRelations({
+      handle: this,
+      collection: Posts,
+      filter: id,
+      mappings: [{
+        key: 'authorId',
         collection: Meteor.users
-      ,
-        reverse: true
-        key: 'postId'
-        collection: Comments
-        filter: { approved: true }
-        options:
-          limit: 10
+      }, {
+        reverse: true,
+        key: 'postId',
+        collection: Comments,
+        filter: { approved: true },
+        options: {
+          limit: 10,
           sort: { createdAt: -1 }
-        mappings: [
-          key: 'userId'
+        },
+        mappings: [{
+          key: 'userId',
           collection: Meteor.users
-        ]
-      ]
+        }]
+      }]
+    });
+  });
 ```
 
 This will publish the post specified by id parameter together
