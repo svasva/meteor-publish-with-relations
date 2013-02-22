@@ -52,6 +52,8 @@ comments to the ```Comments``` collection and corresponding authors to
 the ```Meteor.users``` collection so we have all the data we need to
 display a post.
 
+You can check another (more complex) example at this [gist](https://gist.github.com/erundook/5012259)
+
 ### Compatibility notes
 Use <= v0.1.1 for meteor version < 0.5.7
 
