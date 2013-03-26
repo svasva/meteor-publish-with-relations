@@ -54,6 +54,10 @@ display a post.
 
 You can check another (more complex) example at this [gist](https://gist.github.com/erundook/5012259).
 
+### Changelog
+#### v0.1.4
+- Foreign key can be an array now. Thanks [Tom](http://github.com/tmeasday)!
+
 ### Compatibility notes
 Use <= v0.1.1 for meteor version < 0.5.7
 
