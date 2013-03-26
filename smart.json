@@ -3,7 +3,7 @@
   "description": "Publish associated collections at once",
   "homepage": "https://github.com/erundook/meteor-publish-with-relations",
   "author": "Vitaly A. Sorokin",
-  "version": "0.1.3",
+  "version": "0.1.4",
   "git": "https://github.com/erundook/meteor-publish-with-relations.git"
 }
 
