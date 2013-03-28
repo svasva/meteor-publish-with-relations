@@ -31,6 +31,7 @@ Meteor.publishWithRelations = (params) ->
           filter: mapFilter
           options: mapOptions
           mappings: mapping.mappings
+          _noReady: true
       else
         associations[id][objKey]?.stop()
         associations[id][objKey] =
@@ -51,7 +52,7 @@ Meteor.publishWithRelations = (params) ->
     removed: (id) ->
       handle.stop() for handle in associations[id]
       pub.removed(collection._name, id)
-  pub.ready()
+  pub.ready() unless params._noReady
 
   pub.onStop ->
     for association in associations
