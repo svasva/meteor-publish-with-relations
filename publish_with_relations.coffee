@@ -11,6 +11,7 @@ Meteor.publishWithRelations = (params) ->
       removed: (id) =>
         pub.removed(collection._name, id)
   doMapping = (id, obj, mappings) ->
+    return unless mappings
     for mapping in mappings
       mapFilter = {}
       mapOptions = {}
