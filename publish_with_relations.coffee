@@ -54,8 +54,8 @@ Meteor.publishWithRelations = (params) ->
       handle.stop() for handle in associations[id]
       pub.removed(collection._name, id)
   pub.ready() unless params._noReady
-
+  
   pub.onStop ->
-    for association in associations
-      handle.stop() for handle in association
+    for id, association of associations
+      handle.stop() for key, handle of association
     collectionHandle.stop()
